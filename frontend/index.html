@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qlib量化投资平台 - 专业的量化投资研究工具</title>
+    <meta name="description" content="基于Qlib的可视化量化投资平台，提供数据管理、模型训练、策略回测等功能">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- 预加载关键资源 -->
+    <link rel="preload" href="https://unpkg.com/react@18/umd/react.production.min.js" as="script">
+    <link rel="preload" href="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" as="script">
+</head>
+<body>
+    <!-- 应用加载中的占位符 -->
+    <div id="root">
+        <div class="app-loading">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">
+                <h2>🚀 Qlib量化平台</h2>
+                <p>正在加载中...</p>
+                <div id="loading-status" style="margin-top: 16px; font-size: 12px; color: rgba(255,255,255,0.8);"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 浏览器不支持JS的提示 -->
+    <noscript>
+        <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+            <h2>⚠️ 需要启用JavaScript</h2>
+            <p>此应用需要JavaScript才能正常运行，请在浏览器中启用JavaScript。</p>
+        </div>
+    </noscript>
+    
+    <!-- React 核心库 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX 转换 -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- 图表库 - 移除有问题的Recharts，我们使用原生SVG绘制图表 -->
+    
+    <!-- API接口 -->
+    <script type="text/babel" src="api/qlib-api.js"></script>
+    
+    <!-- 应用组件 (静态加载，按依赖顺序) -->
+    <script type="text/babel" src="components/Layout.js"></script>
+    <script type="text/babel" src="components/Dashboard.js"></script>
+    <script type="text/babel" src="components/DataManagement.js"></script>
+    <script type="text/babel" src="components/FactorWorkshop.js"></script>
+    <script type="text/babel" src="components/FactorEditor.js"></script>
+    <script type="text/babel" src="components/FactorAnalysis.js"></script>
+    <script type="text/babel" src="components/FactorManagement.js"></script>
+    <script type="text/babel" src="components/WorkflowConfiguration.js"></script>
+    <script type="text/babel" src="components/ModelTraining.js"></script>
+    <script type="text/babel" src="components/StrategyBacktest.js"></script>
+    <script type="text/babel" src="components/BacktestResults.js"></script>
+    
+    <!-- 主应用入口 -->
+    <script type="text/babel" src="app.js"></script>
+
+    <!-- 简化的错误处理 -->
+    <script>
+        // 简单的错误处理
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('JavaScript错误:', { msg, url, lineNo, columnNo, error });
+            
+            // 显示友好的错误信息
+            const loadingDiv = document.querySelector('.app-loading');
+            if (loadingDiv) {
+                loadingDiv.innerHTML = `
+                    <div style="text-align: center; color: #ff4d4f;">
+                        <h2>❌ 页面加载出错</h2>
+                        <p>错误信息: ${msg}</p>
+                        <p>可能原因: 网络连接问题或脚本加载失败</p>
+                        <button onclick="window.location.reload()" style="
+                            background: #ff4d4f; 
+                            color: white; 
+                            border: none; 
+                            padding: 12px 24px; 
+                            border-radius: 6px; 
+                            cursor: pointer;
+                            margin-top: 20px;
+                            font-size: 16px;
+                        ">
+                            🔄 重新加载
+                        </button>
+                        <p style="margin-top: 16px; font-size: 12px; opacity: 0.8;">
+                            如果问题持续存在，请检查网络连接或尝试使用 single-page.html
+                        </p>
+                    </div>
+                `;
+            }
+            return false;
+        };
+
+        // 等待页面完全加载后，自动隐藏加载屏幕
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const loadingDiv = document.querySelector('.app-loading');
+                if (loadingDiv && document.querySelector('#root').children.length > 1) {
+                    loadingDiv.style.display = 'none';
+                }
+            }, 2000); // 2秒后检查是否加载完成
+        });
+    </script>
+</body>
+</html>

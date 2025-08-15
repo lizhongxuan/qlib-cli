@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qlib量化投资平台</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 加载中占位符 -->
+    <div id="loading" class="app-loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">
+            <h2>🚀 Qlib量化平台</h2>
+            <p>正在加载中...</p>
+            <div id="loading-progress" style="margin-top: 16px; font-size: 12px; opacity: 0.8;"></div>
+        </div>
+    </div>
+    
+    <div id="root"></div>
+
+    <!-- React 库 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- 应用代码 -->
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+
+        // 更新加载进度
+        function updateProgress(step, message) {
+            const progressEl = document.getElementById('loading-progress');
+            if (progressEl) {
+                progressEl.textContent = message;
+                console.log(`${step}% - ${message}`);
+            }
+        }
+
+        // Layout组件
+        const Layout = ({ children, currentPage, onNavigate }) => {
+            const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+            const [notifications, setNotifications] = useState([
+                { id: 1, type: 'success', message: '模型训练完成', time: '2分钟前' },
+                { id: 2, type: 'info', message: '数据集更新', time: '15分钟前' }
+            ]);
+            const [showNotifications, setShowNotifications] = useState(false);
+
+            const menuItems = [
+                { key: 'dashboard', label: '总览', icon: '📊', desc: '系统概览和快速操作' },
+                { key: 'data', label: '数据管理', icon: '💾', desc: '数据集和数据源管理' },
+                { key: 'model', label: '模型训练', icon: '🤖', desc: '模型配置、训练和管理' },
+                { key: 'backtest', label: '策略回测', icon: '📈', desc: '策略配置和回测分析' }
+            ];
+
+            const systemStatus = {
+                cpu: 65,
+                memory: 78,
+                disk: 45,
+                network: 'online'
+            };
+
+            const clearNotification = (id) => {
+                setNotifications(prev => prev.filter(n => n.id !== id));
+            };
+
+            return (
+                <div className="layout">
+                    {/* 顶部导航栏 */}
+                    <header className="header">
+                        <div className="header-left">
+                            <button 
+                                className="sidebar-toggle"
+                                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                            >
+                                ☰
+                            </button>
+                            <div className="logo">
+                                <span className="logo-icon">📊</span>
+                                <span className="logo-text">Qlib量化平台</span>
+                            </div>
+                        </div>
+                        
+                        <div className="header-center">
+                            <div className="breadcrumb">
+                                <span className="breadcrumb-item">
+                                    {menuItems.find(item => item.key === currentPage)?.icon} {' '}
+                                    {menuItems.find(item => item.key === currentPage)?.label}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div className="header-right">
+                            <div className="system-indicators">
+                                <div className="indicator">
+                                    <span className="indicator-label">CPU</span>
+                                    <div className="indicator-bar">
+                                        <div className="indicator-fill" style={{width: `${systemStatus.cpu}%`}}></div>
+                                    </div>
+                                    <span className="indicator-value">{systemStatus.cpu}%</span>
+                                </div>
+                            </div>
+                            
+                            <div className="header-actions">
+                                <div className="notification-bell" onClick={() => setShowNotifications(!showNotifications)}>
+                                    🔔
+                                    {notifications.length > 0 && (
+                                        <span className="notification-badge">{notifications.length}</span>
+                                    )}
+                                </div>
+                                <div className="user-menu">
+                                    <div className="user-avatar">👤</div>
+                                    <div className="user-name">管理员</div>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="layout-body">
+                        {/* 侧边栏 */}
+                        <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
+                            <nav className="sidebar-nav">
+                                {menuItems.map(item => (
+                                    <div
+                                        key={item.key}
+                                        className={`nav-item ${currentPage === item.key ? 'active' : ''}`}
+                                        onClick={() => onNavigate(item.key)}
+                                        title={sidebarCollapsed ? `${item.label} - ${item.desc}` : ''}
+                                    >
+                                        <span className="nav-icon">{item.icon}</span>
+                                        {!sidebarCollapsed && (
+                                            <div className="nav-content">
+                                                <span className="nav-label">{item.label}</span>
+                                                <span className="nav-desc">{item.desc}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </nav>
+                        </aside>
+
+                        {/* 主内容区 */}
+                        <main className="main-content">
+                            {children}
+                        </main>
+                    </div>
+
+                    {/* 状态栏 */}
+                    <footer className="status-bar">
+                        <div className="status-left">
+                            <span className="status-item">🟢 系统正常</span>
+                            <span className="status-item">📊 实时数据已连接</span>
+                            <span className="status-item">⏰ {new Date().toLocaleString()}</span>
+                        </div>
+                        <div className="status-right">
+                            <span className="status-item">磁盘: {systemStatus.disk}%</span>
+                            <span className="status-item">网络: 🟢 在线</span>
+                        </div>
+                    </footer>
+
+                    {/* 通知面板 */}
+                    {showNotifications && (
+                        <div className="notification-panel">
+                            <div className="notification-header">
+                                <h3>通知</h3>
+                                <button onClick={() => setShowNotifications(false)}>×</button>
+                            </div>
+                            <div className="notification-list">
+                                {notifications.length === 0 ? (
+                                    <div className="no-notifications">暂无通知</div>
+                                ) : (
+                                    notifications.map(notification => (
+                                        <div key={notification.id} className={`notification-item ${notification.type}`}>
+                                            <div className="notification-content">
+                                                <div className="notification-message">{notification.message}</div>
+                                                <div className="notification-time">{notification.time}</div>
+                                            </div>
+                                            <button 
+                                                className="notification-close"
+                                                onClick={() => clearNotification(notification.id)}
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // Dashboard组件
+        const Dashboard = ({ tasks = [], datasets = [], models = [], onNavigate = () => {} }) => {
+            const [timeRange, setTimeRange] = useState('1M');
+            
+            const performanceData = [
+                { date: '01-01', value: 100, benchmark: 100 },
+                { date: '01-15', value: 108, benchmark: 101 },
+                { date: '02-01', value: 112, benchmark: 103 },
+                { date: '02-15', value: 125, benchmark: 108 },
+            ];
+
+            const marketData = {
+                sh000300: { value: 3456.78, change: '+1.23%', trend: 'up' },
+                sz399905: { value: 6789.12, change: '-0.45%', trend: 'down' },
+                sh000905: { value: 5432.10, change: '+0.67%', trend: 'up' }
+            };
+
+            const stats = {
+                totalReturn: '+25.0%',
+                sharpeRatio: '1.85',
+                maxDrawdown: '-8.5%',
+                winRate: '62.3%'
+            };
+
+            return (
+                <div className="dashboard">
+                    <div className="dashboard-header">
+                        <h1>🏠 系统总览</h1>
+                        <div className="time-range-selector">
+                            {['1D', '1W', '1M', '3M', '1Y'].map(range => (
+                                <button 
+                                    key={range}
+                                    className={`time-btn ${timeRange === range ? 'active' : ''}`}
+                                    onClick={() => setTimeRange(range)}
+                                >
+                                    {range}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    {/* 快速操作区域 */}
+                    <div className="quick-actions">
+                        <h2>🚀 快速开始</h2>
+                        <div className="action-cards">
+                            <div className="action-card" onClick={() => onNavigate('data')}>
+                                <div className="action-icon">💾</div>
+                                <div className="action-content">
+                                    <h3>准备数据</h3>
+                                    <p>创建数据集，选择股票池和特征</p>
+                                </div>
+                                <div className="action-arrow">→</div>
+                            </div>
+                            <div className="action-card" onClick={() => onNavigate('model')}>
+                                <div className="action-icon">🤖</div>
+                                <div className="action-content">
+                                    <h3>训练模型</h3>
+                                    <p>配置和训练量化预测模型</p>
+                                </div>
+                                <div className="action-arrow">→</div>
+                            </div>
+                            <div className="action-card" onClick={() => onNavigate('backtest')}>
+                                <div className="action-icon">📈</div>
+                                <div className="action-content">
+                                    <h3>策略回测</h3>
+                                    <p>测试策略历史表现</p>
+                                </div>
+                                <div className="action-arrow">→</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 市场概览 */}
+                    <div className="market-overview">
+                        <h2>📊 市场概览</h2>
+                        <div className="market-cards">
+                            <div className="market-card">
+                                <div className="market-name">沪深300</div>
+                                <div className="market-value">{marketData.sh000300.value}</div>
+                                <div className={`market-change ${marketData.sh000300.trend}`}>
+                                    {marketData.sh000300.change}
+                                </div>
+                            </div>
+                            <div className="market-card">
+                                <div className="market-name">中证500</div>
+                                <div className="market-value">{marketData.sz399905.value}</div>
+                                <div className={`market-change ${marketData.sz399905.trend}`}>
+                                    {marketData.sz399905.change}
+                                </div>
+                            </div>
+                            <div className="market-card">
+                                <div className="market-name">中证1000</div>
+                                <div className="market-value">{marketData.sh000905.value}</div>
+                                <div className={`market-change ${marketData.sh000905.trend}`}>
+                                    {marketData.sh000905.change}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* 统计卡片 */}
+                    <div className="stats-section">
+                        <h2>📈 策略表现</h2>
+                        <div className="stats-grid">
+                            <div className="stat-card">
+                                <div className="stat-icon">💰</div>
+                                <div className="stat-content">
+                                    <div className="stat-label">累计收益</div>
+                                    <div className="stat-value positive">{stats.totalReturn}</div>
+                                </div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-icon">⚡</div>
+                                <div className="stat-content">
+                                    <div className="stat-label">夏普比率</div>
+                                    <div className="stat-value">{stats.sharpeRatio}</div>
+                                </div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-icon">📉</div>
+                                <div className="stat-content">
+                                    <div className="stat-label">最大回撤</div>
+                                    <div className="stat-value negative">{stats.maxDrawdown}</div>
+                                </div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-icon">🎯</div>
+                                <div className="stat-content">
+                                    <div className="stat-label">胜率</div>
+                                    <div className="stat-value">{stats.winRate}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 页面占位符组件
+        const PagePlaceholder = ({ icon, title, description }) => (
+            <div className="page-placeholder">
+                <div className="placeholder-icon">{icon}</div>
+                <h2>{title}</h2>
+                <p>{description}</p>
+            </div>
+        );
+
+        // 主应用组件
+        const App = () => {
+            const [currentPage, setCurrentPage] = useState('dashboard');
+            const [tasks, setTasks] = useState([]);
+            const [datasets, setDatasets] = useState([
+                { id: 'ds1', name: '沪深300日线数据', status: 'ready', samples: 50000, features: 20, dateRange: '2020-01-01 至 2023-12-31' },
+                { id: 'ds2', name: '中证500日线数据', status: 'ready', samples: 45000, features: 18, dateRange: '2020-01-01 至 2023-12-31' }
+            ]);
+            const [models, setModels] = useState([
+                { id: 'model1', name: 'XGBoost-v1.0', type: 'XGBoost', ic: 0.045, sharpe: 1.23, status: 'trained', trainTime: '2024-01-10' },
+                { id: 'model2', name: 'LightGBM-v2.0', type: 'LightGBM', ic: 0.052, sharpe: 1.35, status: 'trained', trainTime: '2024-01-12' }
+            ]);
+
+            // 渲染当前页面
+            const renderPage = () => {
+                switch(currentPage) {
+                    case 'dashboard':
+                        return <Dashboard 
+                            tasks={tasks} 
+                            datasets={datasets} 
+                            models={models}
+                            onNavigate={setCurrentPage}
+                        />;
+                    case 'data':
+                        return <PagePlaceholder 
+                            icon="💾" 
+                            title="数据管理" 
+                            description="数据集管理、数据源配置和数据探索功能" 
+                        />;
+                    case 'model':
+                        return <PagePlaceholder 
+                            icon="🤖" 
+                            title="模型训练" 
+                            description="模型配置、训练监控和模型仓库管理功能" 
+                        />;
+                    case 'backtest':
+                        return <PagePlaceholder 
+                            icon="📈" 
+                            title="策略回测" 
+                            description="策略配置、回测执行和结果分析功能" 
+                        />;
+                    default:
+                        return <Dashboard 
+                            tasks={tasks} 
+                            datasets={datasets} 
+                            models={models}
+                            onNavigate={setCurrentPage}
+                        />;
+                }
+            };
+
+            return (
+                <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
+                    {renderPage()}
+                </Layout>
+            );
+        };
+
+        // 初始化应用
+        function initApp() {
+            try {
+                updateProgress(70, '初始化React应用...');
+                
+                // 隐藏加载屏幕
+                setTimeout(() => {
+                    updateProgress(90, '渲染界面...');
+                    document.getElementById('loading').style.display = 'none';
+                    ReactDOM.render(<App />, document.getElementById('root'));
+                    updateProgress(100, '加载完成！');
+                }, 500);
+                
+            } catch (error) {
+                console.error('应用初始化失败:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div style="text-align: center; color: #ff4d4f;">
+                        <h2>❌ 应用初始化失败</h2>
+                        <p>${error.message}</p>
+                        <button onclick="window.location.reload()">重新加载</button>
+                    </div>
+                `;
+            }
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('load', () => {
+            updateProgress(10, '检查环境...');
+            
+            if (typeof React === 'undefined') {
+                throw new Error('React未加载');
+            }
+            
+            updateProgress(30, 'React环境正常');
+            
+            if (typeof ReactDOM === 'undefined') {
+                throw new Error('ReactDOM未加载');
+            }
+            
+            updateProgress(50, '准备初始化应用...');
+            setTimeout(initApp, 200);
+        });
+
+        // 错误处理
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('JavaScript错误:', { msg, url, lineNo, columnNo, error });
+            
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.innerHTML = `
+                    <div style="text-align: center; color: #ff4d4f;">
+                        <h2>❌ 应用错误</h2>
+                        <p>错误信息: ${msg}</p>
+                        <p>位置: ${url || '未知'}:${lineNo || 0}</p>
+                        <button onclick="window.location.reload()" style="
+                            background: #ff4d4f; 
+                            color: white; 
+                            border: none; 
+                            padding: 12px 24px; 
+                            border-radius: 6px; 
+                            cursor: pointer;
+                            margin-top: 16px;
+                        ">
+                            重新加载
+                        </button>
+                    </div>
+                `;
+            }
+            return false;
+        };
+    </script>
+</body>
+</html>
