@@ -415,6 +415,7 @@ port_analysis_config:
                                         <input
                                             type="checkbox"
                                             id={factor.id}
+                                            checked={pipeline.features.factors?.some(f => f.id === factor.id) || false}
                                             onChange={(e) => {
                                                 const factors = pipeline.features.factors || [];
                                                 if (e.target.checked) {
@@ -912,22 +913,13 @@ port_analysis_config:
                 </div>
 
                 <div className="controls-right">
-                    {activeStep < workflowSteps.length - 1 ? (
-                        <button 
-                            className="btn-primary"
-                            onClick={() => setActiveStep(activeStep + 1)}
-                        >
-                            下一步 →
-                        </button>
-                    ) : (
-                        <button 
-                            className="btn-success btn-large"
-                            onClick={runQlibWorkflow}
-                            disabled={isRunning}
-                        >
-                            {isRunning ? '🔄 运行中...' : '🚀 运行qlib工作流'}
-                        </button>
-                    )}
+                    <button 
+                        className="btn-success btn-large"
+                        onClick={runQlibWorkflow}
+                        disabled={isRunning}
+                    >
+                        {isRunning ? '🔄 运行中...' : '🚀 运行qlib工作流'}
+                    </button>
                 </div>
             </div>
 

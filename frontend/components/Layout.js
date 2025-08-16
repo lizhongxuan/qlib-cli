@@ -13,7 +13,7 @@ const Layout = ({ children, currentPage, onNavigate }) => {
         { key: 'dashboard', label: '总览', icon: '🏠', desc: '系统概览和快速操作' },
         { key: 'data', label: '数据管理', icon: '💾', desc: 'Qlib数据集和数据源管理' },
         { key: 'factor', label: '因子研究', icon: '🧮', desc: '因子开发、编辑和分析' },
-        { key: 'workflow', label: '量化研究', icon: '⚙️', desc: '完整的量化投资研究流程' },
+        { key: 'workflow', label: 'qlib量化研究工作流', icon: '⚙️', desc: '基于qlib的端到端量化投资研究流程' },
         { key: 'results', label: '结果分析', icon: '📊', desc: '模型和策略分析报告' },
     ];
 
