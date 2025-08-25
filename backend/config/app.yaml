@@ -1,0 +1,139 @@
+# 应用配置文件
+app:
+  name: "qlib-backend"
+  version: "1.0.0"
+  port: 8000
+  mode: "debug"  # debug, release, test
+  
+# 服务器配置
+server:
+  host: "0.0.0.0"
+  port: 8000
+  read_timeout: 60s
+  write_timeout: 60s
+  idle_timeout: 120s
+  max_header_bytes: 1048576  # 1MB
+
+# 数据库配置
+database:
+  host: "localhost"
+  port: 3306
+  username: "root"
+  password: "password"
+  database: "qlib"
+  charset: "utf8mb4"
+  max_idle_conns: 10
+  max_open_conns: 100
+  conn_max_lifetime: "1h"
+  conn_max_idle_time: "10m"
+
+# Redis配置（可选）
+redis:
+  host: "localhost"
+  port: 6379
+  password: ""
+  db: 0
+  pool_size: 10
+  min_idle_conns: 5
+
+# JWT配置
+jwt:
+  secret: "qlib-secret-key"
+  expire: 24h
+  refresh_expire: 168h  # 7天
+  issuer: "qlib-backend"
+
+# Qlib配置
+qlib:
+  python_path: "/usr/bin/python3"
+  data_path: "~/.qlib/qlib_data"
+  cache_path: "~/.qlib/cache"
+  script_dir: "./scripts/qlib"
+  output_dir: "./output/qlib"
+  region: "cn"
+  provider: "yahoo"
+
+# 文件上传配置
+upload:
+  max_size: 100MB
+  allowed_extensions: [".csv", ".json", ".pkl", ".h5", ".parquet", ".feather", ".txt"]
+  upload_dir: "./uploads"
+  
+# 日志配置
+logging:
+  level: "info"  # debug, info, warn, error
+  format: "json"  # json, text
+  output: "stdout"  # stdout, stderr, file
+  file_path: "./logs/app.log"
+  max_size: 100MB
+  max_age: 30  # 天
+  max_backups: 10
+  compress: true
+
+# CORS配置
+cors:
+  allow_origins: ["http://localhost:3000", "http://localhost:8080"]
+  allow_methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+  allow_headers: ["Origin", "Content-Type", "Accept", "Authorization"]
+  allow_credentials: true
+  max_age: 86400
+
+# 限流配置
+rate_limit:
+  enable: true
+  api_rate: 100      # 每秒API请求数
+  api_burst: 200     # API突发请求数
+  upload_rate: 5     # 每分钟上传请求数
+  upload_burst: 10   # 上传突发请求数
+  websocket_rate: 10 # 每秒WebSocket连接数
+  websocket_burst: 20
+
+# WebSocket配置
+websocket:
+  read_buffer_size: 1024
+  write_buffer_size: 1024
+  check_origin: false
+  ping_period: 54s
+  pong_wait: 60s
+  write_wait: 10s
+  max_message_size: 512
+
+# 监控配置
+monitoring:
+  enable: true
+  metrics_path: "/metrics"
+  health_path: "/health"
+
+# 性能配置
+performance:
+  max_workers: 10
+  worker_timeout: 300s  # 5分钟
+  queue_size: 1000
+
+# 安全配置
+security:
+  enable_https: false
+  cert_file: ""
+  key_file: ""
+  trusted_proxies: ["127.0.0.1", "::1"]
+  
+# 缓存配置
+cache:
+  default_expiration: 10m
+  cleanup_interval: 5m
+  max_entries: 10000
+
+# 邮件配置（用于通知）
+email:
+  smtp_host: "smtp.gmail.com"
+  smtp_port: 587
+  username: ""
+  password: ""
+  from: "noreply@qlib.com"
+  use_tls: true
+
+# 通知配置
+notification:
+  enable: true
+  channels: ["email", "websocket"]
+  templates_dir: "./templates/notifications"
